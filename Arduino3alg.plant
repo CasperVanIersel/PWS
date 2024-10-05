@@ -20,7 +20,9 @@ const int chipSelect = 4; // dit is voor de SD kaart
 const int vochtigheidsmeter1 = A0;
 const int lichtdetector1 = A1;
 const int temperat_1 = A2;
-//int lichtwaarde1 = 0; // handiger voor code later
+const int pomp1 = 2; // dit is voor de waterpomp voor de planten
+const int pomp2 = 3; // dit is een andere waterpomp
+
 
 //variabelen voor kant 2
 const int vochtigheidsmeter2 = A5;
@@ -106,7 +108,26 @@ void loop (void){
     } else {
       //Serial.println("Kan bestand niet openen");
     dataFile.close();
+
+    // waterpomp1 voor de planten
+    int waterpomp1 = analogRead(pomp1);
+
+    if (waterpomp1 >= 520){
+      digitalWrite(pomp1, HIGH);
     }
+    else {
+      digitalWrite(pomp1,LOW);
+    }
+    }
+    // water pomp2 voor de algen
+    int waterpomp2= analogRead(pomp2);
+    if (waterpomp2 < 1000){
+      digitalWrite(pomp2, HIGH);
+    }
+    else {
+      digitalWrite(pomp2,LOW);
+    }
+
   if (Pycharmcommand = "Initiate SD-card Arduino 3"){
         // Lees het bestand regel voor regel
     while (dataFile.available()) {
@@ -120,5 +141,7 @@ void loop (void){
 
 }
 }
+
+
 
 
