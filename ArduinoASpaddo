@@ -43,8 +43,7 @@ void setup() {
 }
 
 void loop() {
-  if (Serial.available() > 0){
-    if(Pycharmcommand = "Initiate sensorimport ArduinoAS"){
+    if(Pycharmcommand = "Initiate sensorimport ArduinoAS" or Serial.available() > 0){
   //AardeVochtMeter
   int AVochtMeter_waarde = analogRead(A1);  // leest de waardes van de meter
   Serial.print(AVochtMeter_waarde);         // print de waarde
@@ -116,6 +115,5 @@ void loop() {
   }
 
 
-}
 }
 }
