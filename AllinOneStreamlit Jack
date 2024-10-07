@@ -6,6 +6,7 @@ import datetime
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import time
 
 #Database MYSQL connecten
 db = mysql.connector.connect(  host='localhost',
@@ -18,8 +19,6 @@ cursor = db.cursor()
 #Variabelen
 x = 1 # variabele die verder in de code wordt gebruikt om errors te voorkomen
 
-st.sidebar.header("Menu") #dit is de titel van de sidebar
-sideselectbox = st.sidebar.selectbox("Choose page", ["Home","Plot Data", "Realtime plot and input", "Progression and prospects"], key = "selectbox")
 
 #Datum een integer maken --> id voor iedere tabel is toch uniek
 now = str(datetime.datetime.now())
@@ -29,6 +28,61 @@ timestamp_int3 = timestamp_int2.replace(":", "")
 timestamp_int4 = timestamp_int3.replace(" ", "")
 timestamp = int(timestamp_int4.replace(".", '')[0:14])
 #print(timestamp)
+
+#Deze lijsten zijn voor de RealtimePlot
+#ArduinoAS
+TemperatuurASList = []
+AardeVochtASList = []
+LuchtVochtASList = []
+LichtASList = []
+
+TemperatuurASdate = []
+AardeVochtASdate = []
+LuchtVochtASdate = []
+LichtASdate = []
+
+#Arduino1
+TemperatuurArduino1Waarde1List = []
+AardeVochtArduino1Waarde1List = []
+LuchtVochtArduino1Waarde1List = []
+LichtArduino1Waarde1List = []
+
+TemperatuurArduino1Waarde1Date = []
+AardeVochtArduino1Waarde1Date = []
+LuchtVochtArduino1Waarde1Date = []
+LichtArduino1Waarde1Date = []
+
+TemperatuurArduino1Waarde2List = []
+AardeVochtArduino1Waarde2List = []
+LuchtVochtArduino1Waarde2List = []
+LichtArduino1Waarde2List = []
+
+TemperatuurArduino1Waarde2Date = []
+AardeVochtArduino1Waarde2Date = []
+LuchtVochtArduino1Waarde2Date = []
+LichtArduino1Waarde2Date = []
+
+
+#Arduino2
+TemperatuurArduino2Waarde1List = []
+AardeVochtArduino2Waarde1List = []
+LuchtVochtArduino2Waarde1List = []
+LichtArduino2Waarde1List = []
+
+TemperatuurArduino2Waarde2List = []
+AardeVochtArduino2Waarde2List = []
+LuchtVochtArduino2Waarde2List = []
+LichtArduino2Waarde2List = []
+
+TemperatuurArduino2Waarde1Date = []
+AardeVochtArduino2Waarde1Date = []
+LuchtVochtArduino2Waarde1Date = []
+LichtArduino2Waarde1Date = []
+
+TemperatuurArduino2Waarde2Date = []
+AardeVochtArduino2Waarde2Date = []
+LuchtVochtArduino2Waarde2Date = []
+LichtArduino2Waarde2Date = []
 
 #Definities maken voor structuur in de code
 def import_arduinoAS(): #dit is om alle data met specifieke begrippen in de MYSQL te doen, zelfde geldt voor de andere functies
@@ -152,6 +206,7 @@ def import_arduino2():
         print('AardeVocht error')
 
     try:
+        conn = mysql.connector.connect(db)
         if Temperatuur1arduino2_waarde != '':
             cursor.execute("INSERT INTO Temperatuur1arduino2 (Temperatuur1arduino2, date) VALUES (%s, %s)",
                            (Temperatuur1arduino2_waarde, timestamp))
@@ -159,7 +214,9 @@ def import_arduino2():
             print("Temperatuur waarde is ", Temperatuur1arduino2_waarde)
     except:
         print('Temp error')
+
     try:
+        conn = mysql.connector.connect(db)
         if LuchtVocht1arduino2_waarde != '':
             cursor.execute("INSERT INTO LuchtVocht1arduino2 (LuchtVocht1arduino2, date) VALUES (%s, %s)",
                            (LuchtVocht1arduino2_waarde, timestamp))
@@ -168,6 +225,7 @@ def import_arduino2():
     except:
         print('LV error')
     try:
+        conn = mysql.connector.connect(db)
         if Licht1arduino2_waarde != '':
             cursor.execute("INSERT INTO Licht1arduino2 (Licht1arduino2, date) VALUES (%s, %s)",
                            (Licht1arduino2_waarde, timestamp))
@@ -176,6 +234,7 @@ def import_arduino2():
     except:
         print('Licht error')
     try:
+        conn = mysql.connector.connect(db)
         if AardeVocht2arduino2_waarde != '':
             cursor.execute("INSERT INTO AardeVocht2arduino2 (AardeVocht2arduino2, date) VALUES (%s, %s)",
                            (AardeVocht2arduino2_waarde, timestamp))
@@ -186,6 +245,7 @@ def import_arduino2():
         print('AardeVocht error')
 
     try:
+        conn = mysql.connector.connect(db)
         if Temperatuur2arduino2_waarde != '':
             cursor.execute("INSERT INTO Temperatuur2arduino2 (Temperatuur2arduino2, date) VALUES (%s, %s)",
                            (Temperatuur2arduino2_waarde, timestamp))
@@ -194,6 +254,7 @@ def import_arduino2():
     except:
         print('Temp error')
     try:
+        conn = mysql.connector.connect(db)
         if LuchtVocht2arduino2_waarde != '':
             cursor.execute("INSERT INTO LuchtVocht2arduino2 (LuchtVocht2arduino2, date) VALUES (%s, %s)",
                            (LuchtVocht2arduino2_waarde, timestamp))
@@ -201,6 +262,7 @@ def import_arduino2():
             print("LuchtVocht is ", LuchtVocht2arduino2_waarde)
     except:
         print('LV error')
+        conn = mysql.connector.connect(db)
     try:
         if Licht2arduino2_waarde != '':
             cursor.execute("INSERT INTO Licht2arduino2 (Licht2arduino2, date) VALUES (%s, %s)",
@@ -212,27 +274,30 @@ def import_arduino2():
 def connect_arduinos():
     # arduino inloggen
     # Arduino(s) connecten
-    arduino1 = serial.Serial("COM5", baudrate=9600, timeout=3)
-    arduino2 = serial.Serial("COM3", baudrate=9600, timeout=3)  # idk wat timeout doet
-    arduino3 = serial.Serial("COM4", baudrate=9600, timeout=3)  # deze klopt niet
+    try:
+        arduino1 = serial.Serial("COM5", baudrate=9600, timeout=3) #ArduinoAS
+        arduinoDataString1 = arduino1.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
+    except:
+        print("")
+    try:
+        arduino2 = serial.Serial("COM3", baudrate=9600, timeout=3)  # idk wat timeout doet
+        arduinoDataString2 = arduino2.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
+    except:
+        print("")
+    try:
+        arduino3 = serial.Serial("COM4", baudrate=9600, timeout=3)  # deze klopt niet
+        arduinoDataString3 = arduino3.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
+    except:
+        print('')
 
-    arduinoDataString1 = arduino1.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
-    arduinoDataString2 = arduino2.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
-    arduinoDataString3 = arduino3.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
 
-#Begrippen definieren om eventuele foutmeldingen te voorkomen
-arduinoDataString1 = 0
-arduinoDataString2 = 0
-arduinoDataString3 = 0
+
+st.sidebar.header("Menu") #dit is de titel van de sidebar
+sideselectbox = st.sidebar.selectbox("Choose page", ["Home","Plot Data", "Realtime plot and input", "Progression and prospects"], key = "selectbox")
 
 if x == 1: # dit voorkomt gedoe met tab
-    arduino1 = serial.Serial("COM5", baudrate=9600, timeout=3)
-    arduino2 = serial.Serial("COM3", baudrate=9600, timeout=3)  # idk wat timeout doet
-    arduino3 = serial.Serial("COM4", baudrate=9600, timeout=3)  # deze klopt niet
 
-    arduino1.write("Initiate sensorsimport ArduinoAS") #moet ik nog veranderen bij de arduino code
-    arduino2.write("Initiate sensorsimport Arduino 1")
-    arduino3.write("Initiate sensorsimport Arduino 2")
+
     if sideselectbox == "Home":
         #App openen
         try:
@@ -240,55 +305,226 @@ if x == 1: # dit voorkomt gedoe met tab
             st.header("Our new way to emergency aid for a world with less hunger")
             st.write('Oke')
         except:
-            print("Eror 101, contact website builders")
+            print("Error 101, contact website builders")
     #Begin import
     elif sideselectbox ==  "Realtime plot and input":
         #Ontcijferen van input, allemaal in integers anders foutmeldingen
-        try:
+        if x == 1: #Soms is er gedoe met een tab waar ik geen zin in heb
             while x == 1:
-                connect_arduinos()
                 try:
-                    # Dataimport arduino1 AKA arduino AS
-                    print(arduinoDataString1)
-                    AardeVochtASwaarde = arduinoDataString1[0:3]
-                    TemperatuurASwaarde = arduinoDataString1[3:5]
-                    LuchtVochtASwaarde = arduinoDataString1[8:10]
-                    LichtASwaarde = arduinoDataString1[13:16]
-                    import_arduinoAS()
-                    #Regendruppelaar1 = arduinoDataString[16:20]
+                    arduino1 = serial.Serial("COM5", baudrate=4800, timeout = 16)  # ArduinoAS
+                    arduinoDataString1 = arduino1.readline().decode('utf-8').rstrip()  # vertaald de arduino wartaal
+                    time.sleep(2)
                 except:
-                    st.write("Error data waardes 1")
+                    st.write("No connection with arduino")
+                multiselectRPI = st.sidebar.multiselect("Choose the arduino(s) needed", ["ArduinoAS", "Arduino2", "Arduino3"], key = 'Multiselect RPI')
+                if "ArduinoAS" in multiselectRPI and arduinoDataString1 != 0:
+                    for i in range(1, 100):  # while len(TemperatuurASList) >= 25 or len(TemperatuurArduino1Waarde1List) >= 25 or len(TemperatuurArduino2Waarde1List):
+                        try:
+                            time.sleep(1)
+                            # Dataimport arduino1 AKA arduino AS
+                            st.write(arduinoDataString1)
+                            time.sleep(1)
+                            AardeVochtASwaarde = arduinoDataString1[0:3]
+                            TemperatuurASwaarde = arduinoDataString1[3:5]
+                            LuchtVochtASwaarde = arduinoDataString1[8:10]
+                            LichtASwaarde = arduinoDataString1[13:16]
+                            time.sleep(1)
 
-                try:
-                    AardeVocht1arduino1_waarde = arduinoDataString2[0:3] #drie waardes want 1000 is onwaarschijnlijk tenzij kapot
-                    Licht1arduino1_waarde = arduinoDataString2[3:6]
-                    LuchtVocht1arduino1_waarde = arduinoDataString2[6:8]
-                    Temperatuur1arduino1_waarde = arduinoDataString2[8:10] #klein gat door .00
-                    AardeVocht2arduino1_waarde = (arduinoDataString2[13:15])
-                    Licht2arduino1_waarde = arduinoDataString2[15:18]
-                    LuchtVocht2arduino1_waarde = arduinoDataString2[18:20]
-                    Temperatuur2arduino1_waarde = arduinoDataString2[23:25] #klein gat door .00
-                    import_arduino1()
-                except:
-                    st.write("Error data waardes 2")
+                            try:
+                                conn = mysql.connector.connect(db)  # handig voor later in de code
+                                if AardeVochtASwaarde != '':  # mocht er een error zijn
+                                    cursor.execute(
+                                        "INSERT INTO AardeVochtAS (AardeVochtASwaarde, date) VALUES (%s, %s)",
+                                        # dit is eigenlijk gewoon een sql query
+                                        (AardeVochtASwaarde, timestamp))
+                                    conn.commit()  # zorgt ervoor dat er echt verandering komt
+                                    print("Aardevocht waarde is ", AardeVochtASwaarde)  # mocht er iets fout gaan
 
+                            except:
+                                print("Aardevocht error")  # mocht er iets fout zijn
+                                conn = mysql.connector.connect(db)
 
-            #Hier begint de arduino 3
+                            try:
+                                if TemperatuurASwaarde != '':
+                                    cursor.execute(
+                                        "INSERT INTO TemperatuurAS (TemperatuurASwaarde, date) VALUES (%s, %s)",
+                                        (TemperatuurASwaarde, timestamp))
+                                    conn.commit()
+                                    print("Temperatuur waarde is ", TemperatuurASwaarde)
+                            except:
+                                print('Temp error')
+                            try:
+                                if LuchtVochtASwaarde != '':
+                                    cursor.execute(
+                                        "INSERT INTO LuchtVochtAS (LuchtVochtASwaarde, date) VALUES (%s, %s)",
+                                        (LuchtVochtASwaarde, timestamp))
+                                    conn.commit()
+                                    print("LuchtVocht is ", LuchtVochtASwaarde)
+                            except:
+                                print('LV error')
+                            try:
+                                if LichtASwaarde != '':
+                                    cursor.execute("INSERT INTO LichtAS (LichtASwaarde, date) VALUES (%s, %s)",
+                                                   (LichtASwaarde, timestamp))
+                                    conn.commit()
+                                    print("Licht waarde is ", LichtASwaarde)
+                            except:
+                                print('Licht error')
+                        except:
+                            st.write("Error data waardes 1")
 
-                try:
-                    AardeVocht1arduino2_waarde = arduinoDataString3[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
-                    Licht1arduino2_waarde = arduinoDataString3[3:6]
-                    LuchtVocht1arduino2_waarde = arduinoDataString3[6:8]
-                    Temperatuur1arduino2_waarde = arduinoDataString3[8:10]  # klein gat door .00
-                    AardeVocht2arduino2_waarde = (arduinoDataString3[13:15])
-                    Licht2arduino2_waarde = arduinoDataString3[15:18]
-                    LuchtVocht2arduino2_waarde = arduinoDataString3[18:20]
-                    Temperatuur2arduino2_waarde = arduinoDataString3[23:25]  # klein gat door .00
-                    import_arduino2()
-                except:
-                    st.write("Error data waardes 3")
-        except:
-            st.write("Eror 101, contact website builders")
+                        try:
+                            TemperatuurASList = TemperatuurASList.append(TemperatuurASwaarde)
+                            AardeVochtASList = AardeVochtASList.append(AardeVochtASwaarde)
+                            LuchtVochtASList = LuchtVochtASList.append(LuchtVochtASwaarde)
+                            LichtASList = LichtASList.append(LichtASwaarde)
+
+                            time.sleep(0.1)
+
+                            TemperatuurASdate = TemperatuurASdate.append(timestamp)
+                            AardeVochtASdate = AardeVochtASdate.append(timestamp)
+                            LuchtVochtASdate = LuchtVochtASdate.append(timestamp)
+                            LichtASdate = LichtASdate.append(timestamp)
+
+                            time.sleep(0.1)
+                        except:
+                            st.write("Data import AS failed")
+                    try:
+                        fig,ax = plt.subplot(3,1)
+                        ax[0,1].plot = (TemperatuurASList, TemperatuurASdate)
+                        ax[1,1].plot(AardeVochtASList,AardeVochtASdate)
+                        ax[2,1].plot(LuchtVochtASList,LuchtVochtASdate)
+                        ax[3,1].plot(LichtASList, LichtASdate)
+                        time.sleep(0.1)
+                    except:
+                        st.write("Plot has failed")
+                elif "Arduino2" in multiselectRPI:
+                    try:
+                        arduino2 = serial.Serial("COM3", baudrate=9600, timeout=3)  # idk wat timeout doet
+                        arduinoDataString2 = arduino2.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
+                    except:
+                        print("")
+                    try:
+                        AardeVocht1arduino1_waarde = arduinoDataString2[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
+                        Licht1arduino1_waarde = arduinoDataString2[3:6]
+                        LuchtVocht1arduino1_waarde = arduinoDataString2[6:8]
+                        Temperatuur1arduino1_waarde = arduinoDataString2[8:10]  # klein gat door .00
+                        AardeVocht2arduino1_waarde = (arduinoDataString2[13:15])
+                        Licht2arduino1_waarde = arduinoDataString2[15:18]
+                        LuchtVocht2arduino1_waarde = arduinoDataString2[18:20]
+                        Temperatuur2arduino1_waarde = arduinoDataString2[23:25]  # klein gat door .00
+                        import_arduino1()
+                    except:
+                        st.write("Error data waardes 2")
+
+                    for i in range(1, 100):  # while len(TemperatuurASList) >= 25 or len(TemperatuurArduino1Waarde1List) >= 25 or len(TemperatuurArduino2Waarde1List):
+                        try:
+                            TemperatuurArduino1Waarde1List = TemperatuurArduino1Waarde1List.apppend(
+                                Temperatuur1arduino1_waarde)
+                            AardeVochtArduino1Waarde1List = AardeVochtArduino1Waarde1List.append(
+                                AardeVocht1arduino1_waarde)
+                            LuchtVochtArduino1Waarde1List = LuchtVochtArduino1Waarde1List.append(
+                                LuchtVocht1arduino1_waarde)
+                            LichtArduino1Waarde1List = LichtArduino1Waarde1List.append(Licht1arduino1_waarde)
+
+                            TemperatuurArduino1Waarde1Date = TemperatuurArduino1Waarde1Date.append(timestamp)
+                            AardeVochtArduino1Waarde1Date = AardeVochtArduino1Waarde1Date.append(timestamp)
+                            LuchtVochtArduino1Waarde1Date = LuchtVochtArduino1Waarde1Date.append(timestamp)
+                            LichtArduino1Waarde1Date = LichtArduino1Waarde1Date.append(timestamp)
+
+                            TemperatuurArduino1Waarde2List = TemperatuurArduino1Waarde2List.apppend(
+                                Temperatuur2arduino2_waarde)
+                            AardeVochtArduino1Waarde2List = AardeVochtArduino1Waarde2List.append(
+                                AardeVocht2arduino2_waarde)
+                            LuchtVochtArduino1Waarde2List = LuchtVochtArduino1Waarde2List.append(
+                                LuchtVocht2arduino2_waarde)
+                            LichtArduino1Waarde2List = LichtArduino1Waarde2List.append(Licht2arduino2_waarde)
+
+                            TemperatuurArduino1Waarde2Date = TemperatuurArduino1Waarde2Date.append(timestamp)
+                            AardeVochtArduino1Waarde2Date = AardeVochtArduino1Waarde2Date.append(timestamp)
+                            LuchtVochtArduino1Waarde2Date = LuchtVochtArduino1Waarde2Date.append(timestamp)
+                            LichtArduino1Waarde2Date = LichtArduino1Waarde2Date.append(timestamp)
+                        except:
+                            st.write("Data import arduino 1 has failed")
+                        try:
+                            fig, ax = plt.subplots(4,2)
+                            ax[0,1].plot(TemperatuurArduino1Waarde1List, TemperatuurArduino1Waarde1Date)
+                            ax[1,1].plot(AardeVochtArduino1Waarde1List, AardeVochtArduino1Waarde1Date)
+                            ax[2,1].plot(LuchtVochtArduino1Waarde1List, LuchtVochtArduino1Waarde1Date)
+                            ax[3,1].plot(LichtArduino1Waarde1List, LichtArduino1Waarde1Date)
+                            ax[0, 2].plot(TemperatuurArduino1Waarde2List, TemperatuurArduino1Waarde2Date)
+                            ax[1, 2].plot(AardeVochtArduino1Waarde2List, AardeVochtArduino1Waarde2Date)
+                            ax[2, 2].plot(LuchtVochtArduino1Waarde2List, LuchtVochtArduino1Waarde2Date)
+                            ax[3, 2].plot(LichtArduino1Waarde2List, LichtArduino1Waarde2Date)
+                            st.pyplot(fig)
+                        except:
+                            st.write("Plotting Arduino1 has failed")
+
+                elif "Arduino3" in multiselectRPI:
+                    try:
+                        arduino3 = serial.Serial("COM4", baudrate=9600, timeout=3)  # deze klopt niet
+                        arduinoDataString3 = arduino3.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
+                    except:
+                        print('')
+
+                    try:
+                        AardeVocht1arduino2_waarde = arduinoDataString3[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
+                        Licht1arduino2_waarde = arduinoDataString3[3:6]
+                        LuchtVocht1arduino2_waarde = arduinoDataString3[6:8]
+                        Temperatuur1arduino2_waarde = arduinoDataString3[8:10]  # klein gat door .00
+                        AardeVocht2arduino2_waarde = (arduinoDataString3[13:15])
+                        Licht2arduino2_waarde = arduinoDataString3[15:18]
+                        LuchtVocht2arduino2_waarde = arduinoDataString3[18:20]
+                        Temperatuur2arduino2_waarde = arduinoDataString3[23:25]  # klein gat door .00
+                        import_arduino2()
+                        st.pyplot(fig)
+                    except:
+                        st.write("Error data waardes 3")
+                        x = 2 # stop de code
+                    try:
+                        for i in range (1, 100):
+                            try:
+                                TemperatuurArduino2Waarde1List = TemperatuurArduino2Waarde1List.apppend(
+                                    Temperatuur1arduino2_waarde)
+                                AardeVochtArduino2Waarde1List = AardeVochtArduino2Waarde1List.append(AardeVocht1arduino2_waarde)
+                                LuchtVochtArduino2Waarde1List = LuchtVochtArduino2Waarde1List.append(LuchtVocht1arduino2_waarde)
+                                LichtArduino2Waarde1List = LichtArduino2Waarde1List.append(Licht1arduino2_waarde)
+
+                                TemperatuurArduino2Waarde1Date = TemperatuurArduino2Waarde1Date.append(timestamp)
+                                AardeVochtArduino2Waarde1Date = AardeVochtArduino2Waarde1Date.append(timestamp)
+                                LuchtVochtArduino2Waarde1Date = LuchtVochtArduino2Waarde1Date.append(timestamp)
+                                LichtArduino2Waarde2Date = LichtArduino2Waarde1Date.append(timestamp)
+
+                                TemperatuurArduino2Waarde2List = TemperatuurArduino2Waarde2List.apppend(
+                                    Temperatuur2arduino2_waarde)
+                                AardeVochtArduino2Waarde2List = AardeVochtArduino2Waarde2List.append(AardeVocht2arduino2_waarde)
+                                LuchtVochtArduino2Waarde2List = LuchtVochtArduino2Waarde2List.append(LuchtVocht2arduino2_waarde)
+                                LichtArduino2Waarde2List = LichtArduino2Waarde2List.append(Licht2arduino2_waarde)
+
+                                TemperatuurArduino2Waarde2Date = TemperatuurArduino2Waarde2Date.append(timestamp)
+                                AardeVochtArduino2Waarde2Date = AardeVochtArduino2Waarde2Date.append(timestamp)
+                                LuchtVochtArduino2Waarde2Date = LuchtVochtArduino2Waarde2Date.append(timestamp)
+                                LichtArduino2Waarde2Date = LichtArduino2Waarde2Date.append(timestamp)
+                            except:
+                                st.write("Data import arduino2 has failed")
+                    except:
+                        st.write("Data import arduino2 has failed")
+                    try:
+                        ax, fig = plt.subplots(4,2)
+                        ax[0,1].plot(TemperatuurArduino2Waarde1Date, TemperatuurArduino2Waarde1List)
+                        ax[1,1].plot(AardeVochtArduino2Waarde1Date, AardeVochtArduino2Waarde1List)
+                        ax[2,1].plot(LuchtVochtArduino2Waarde1Date, LuchtVochtArduino2Waarde1List)
+                        ax[3,1].plot(LichtArduino2Waarde1Date, LichtArduino2Waarde1List)
+
+                        ax[0,2].plot(TemperatuurArduino2Waarde2Date, TemperatuurArduino2Waarde2List)
+                        ax[1,2].plot(AardeVochtArduino2Waarde2Date, AardeVochtArduino2Waarde2List)
+                        ax[2,2].plot(LuchtVochtArduino2Waarde2Date, LuchtVochtArduino2Waarde2List)
+                        ax[3,2].plot(LichtArduino2Waarde2Date, LichtArduino2Waarde2List)
+                        st.pyplot(fig)
+                    except:
+                        st.write("Data plot arduino2 has failed")
+
     elif sideselectbox == "Plot Data":
         try:
             #Knopje om csv of txt van SD kaart in SQL te stoppen
@@ -322,42 +558,53 @@ if x == 1: # dit voorkomt gedoe met tab
                        import_arduino2()
                 elif SDimport == 'Arduino2.txt':
                     with open(filename) as file:
-                        for row in file:
-                            print('zero')
-                            AardeVocht1arduino1_waarde = file[
-                                                         0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
-                            Licht1arduino1_waarde = file[3:6]
-                            LuchtVocht1arduino1_waarde = file[6:8]
-                            Temperatuur1arduino1_waarde = file[8:10]  # klein gat door .00
-                            AardeVocht2arduino1_waarde = file[13:15]
-                            Licht2arduino1_waarde = file[15:18]
-                            LuchtVocht2arduino1_waarde = file[18:20]
-                            Temperatuur2arduino1_waarde = arduinoDataString2[23:25]  # klein gat door .00
-                            import_arduino1()
+                        try:
+                            for row in file:
+                                print('zero')
+                                AardeVocht1arduino1_waarde = file[
+                                                             0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
+                                Licht1arduino1_waarde = file[3:6]
+                                LuchtVocht1arduino1_waarde = file[6:8]
+                                Temperatuur1arduino1_waarde = file[8:10]  # klein gat door .00
+                                AardeVocht2arduino1_waarde = file[13:15]
+                                Licht2arduino1_waarde = file[15:18]
+                                LuchtVocht2arduino1_waarde = file[18:20]
+                                Temperatuur2arduino1_waarde = file[23:25]  # klein gat door .00
+                                import_arduino1()
+                        except:
+                            st.write("Import document has failed")
                 elif SDimport == 'Arduino3.txt':
-                    with open(filename) as file:
-                        AardeVocht1arduino2_waarde = file[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
-                        Licht1arduino2_waarde = file[3:6]
-                        LuchtVocht1arduino2_waarde = file[6:8]
-                        Temperatuur1arduino2_waarde = file[8:10]  # klein gat door .00
-                        AardeVocht2arduino2_waarde = file[13:15]
-                        Licht2arduino2_waarde = file[15:18]
-                        LuchtVocht2arduino2_waarde = file[18:20]
-                        Temperatuur2arduino2_waarde = arduinoDataString2[23:25]  # klein gat door .00
-                        import_arduino2()
+                    try:
+                        with open(filename) as file:
+                            AardeVocht1arduino2_waarde = file[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
+                            Licht1arduino2_waarde = file[3:6]
+                            LuchtVocht1arduino2_waarde = file[6:8]
+                            Temperatuur1arduino2_waarde = file[8:10]  # klein gat door .00
+                            AardeVocht2arduino2_waarde = file[13:15]
+                            Licht2arduino2_waarde = file[15:18]
+                            LuchtVocht2arduino2_waarde = file[18:20]
+                            Temperatuur2arduino2_waarde = file[23:25]  # klein gat door .00
+                            import_arduino2()
+                    except:
+                        st.write("Import document has failed")
                 elif SDimport == 'ArduinoAS.txt':
-                    with open(filename) as file:
-                        AardeVocht1ASwaarde = file[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
-                        Licht1ASwaarde = file[3:6]
-                        LuchtVocht1ASwaarde = file[6:8]
-                        Temperatuur1ASwaarde = file[8:10]  # klein gat door .00
-                        AardeVocht2ASwaarde = file[13:15]
-                        Licht2ASwaarde = file[15:18]
-                        LuchtVocht2ASwaarde = file[18:20]
-                        Temperatuur2ASwaarde = arduinoDataString2[23:25]
-                        import_arduinoAS()
-            else:
-                st.write("No new file upload")
+                    try:
+                        with open(filename) as file:
+                            AardeVocht1ASwaarde = file[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
+                            Licht1ASwaarde = file[3:6]
+                            LuchtVocht1ASwaarde = file[6:8]
+                            Temperatuur1ASwaarde = file[8:10]  # klein gat door .00
+                            AardeVocht2ASwaarde = file[13:15]
+                            Licht2ASwaarde = file[15:18]
+                            LuchtVocht2ASwaarde = file[18:20]
+                            Temperatuur2ASwaarde = file[23:25]
+                            import_arduinoAS()
+                    except:
+                        st.write("Import document has failed")
+                    # De plotchaos
+                else:
+                    st.write("No new file upload")
+
             #De plotchaos
             cursor.execute("SELECT * FROM TemperatuurAS, ORDER BY date DESC")
             rows_TemperatuurAS = cursor.fetchall()
@@ -500,6 +747,8 @@ if x == 1: # dit voorkomt gedoe met tab
 
     elif sideselectbox == "Progression and prospects":
         st.write("This page is under construction")
+
+
 
 
 
