@@ -14,7 +14,9 @@ DHT dht1(DHT11_PIN1, DHTTYPE1);
 DHT dht2(DHT11_PIN2, DHTTYPE2);
 
 File myFile;
-const int chipSelect = 4; // dit is voor de SD kaart
+const int chipSelect = 10; // dit is voor de SD kaart
+const int x = 4;
+const int pomp = 3;
 
 //variabelen voor kant 1
 const int vochtigheidsmeter1 = A0;
@@ -34,17 +36,17 @@ void setup(){
   Serial.begin(9600);
   dht1.begin(); // start werking DHT-sensor
   dht2.begin();
- // if (!SD.begin(chipSelect)) {
- //   Serial.println("Card failed, or not present");
-    // don't do anything more:
- //   while (1);
- // }
-  //Serial.println("card initialized.");
+ if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+     //don't do anything more:
+    while (1);
+  }
+  Serial.println("card initialized.");
 }
 
 void loop (void){
-  if (Serial.available() > 0){
-    if (Pycharmcommand = "Initiate sensorsimport Arduino 3"){
+  if (x == 4){
+    if (Pycharmcommand == "Initiate sensorsimport Arduino 3" || Serial.available() <= 0){
     
 
     //kant 1
@@ -56,8 +58,8 @@ void loop (void){
     //lichtdetector1
     int lichtwaarde1 = analogRead(A1);
     //Serial.print("Lichtwaarde1 = ");
-    Serial.println(lichtwaarde1);
-    delay(1000);
+    Serial.print(lichtwaarde1);
+    delay(100);
     //temperat_1
     float humid_1 = dht1.readHumidity();
     float temp_1 = dht1.readTemperature();
@@ -65,27 +67,28 @@ void loop (void){
     Serial.print(humid_1);
     //Serial.print("Temperatuur1 = ");
     Serial.print(temp_1);
-    delay(1000);
+    delay(100);
 
+    Serial.print(",");
     //kant 2
     //vochtigheidsmeter 2
     int aardvochtValue2 = analogRead(A5);
     //Serial.print("Aardevocht2 is: ");
     Serial.print(aardvochtValue2);
-    delay(1000); // anders gaat de code te snel en kunnen er mogelijk foute waardes uitkomen
+    delay(100); // anders gaat de code te snel en kunnen er mogelijk foute waardes uitkomen
     //lichtdetector1
     int lichtwaarde2  = analogRead(A4);
     //Serial.print("Lichtwaarde2 = ");
     Serial.print(lichtwaarde2);
-    delay(1000);
+    delay(100);
     //temperat_1
     float humid_2 = dht2.readHumidity();
     float temp_2 = dht2.readTemperature();
     //Serial.print("Luchtvochtigheid2 = ");
     Serial.print(humid_2);
     //Serial.print("Temperatuur2 = ");
-    Serial.print(temp_2);
-    delay(1000);
+    Serial.println(temp_2);
+    delay(100);
 
     //SD kaart
 
@@ -100,13 +103,13 @@ void loop (void){
     dataString += String(humid_2);
     dataString += String(lichtwaarde2);
 
-    File dataFile = SD.open("Arduino3/26/9.txt", FILE_WRITE);  // Open bestand op SD-kaart
+    File dataFile = SD.open("9okt.txt", FILE_WRITE);  // Open bestand op SD-kaart
     if (dataFile) {
       dataFile.println(dataString);
       //Serial.println("YASBITCH");
       dataFile.close();
     } else {
-      //Serial.println("Kan bestand niet openen");
+     // Serial.println("Kan bestand niet openen");
     dataFile.close();
 
     // waterpomp1 voor de planten
@@ -138,6 +141,7 @@ void loop (void){
     dataFile.close();
   }
   }
+  delay(10000);
 
 }
 }
