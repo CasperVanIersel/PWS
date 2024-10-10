@@ -310,101 +310,112 @@ if x == 1: # dit voorkomt gedoe met tab
     elif sideselectbox ==  "Realtime plot and input":
         #Ontcijferen van input, allemaal in integers anders foutmeldingen
         if x == 1: #Soms is er gedoe met een tab waar ik geen zin in heb
-            while x == 1:
+            if x == 1: # update telkens nieuwe waardes
                 try:
-                    arduino1 = serial.Serial("COM5", baudrate=4800, timeout = 16)  # ArduinoAS
+                    arduino1 = serial.Serial("COM5", baudrate=9600, timeout = 5)  # ArduinoAS
+                    #arduino1.reset_input_buffer()
+                    #time.sleep(2)
                     arduinoDataString1 = arduino1.readline().decode('utf-8').rstrip()  # vertaald de arduino wartaal
-                    time.sleep(2)
+                    time.sleep(1)
+                    #st.write(arduinoDataString1)
                 except:
                     st.write("No connection with arduino")
                 multiselectRPI = st.sidebar.multiselect("Choose the arduino(s) needed", ["ArduinoAS", "Arduino2", "Arduino3"], key = 'Multiselect RPI')
-                if "ArduinoAS" in multiselectRPI and arduinoDataString1 != 0:
-                    for i in range(1, 100):  # while len(TemperatuurASList) >= 25 or len(TemperatuurArduino1Waarde1List) >= 25 or len(TemperatuurArduino2Waarde1List):
+                if "ArduinoAS" in multiselectRPI: #and arduinoDataString1 != 0:
+                    if x == 1:  #tab manier
+                        z = 0  # eerste waarde temp is verkeerd
                         try:
-                            time.sleep(1)
-                            # Dataimport arduino1 AKA arduino AS
-                            st.write(arduinoDataString1)
-                            time.sleep(1)
-                            AardeVochtASwaarde = arduinoDataString1[0:3]
-                            TemperatuurASwaarde = arduinoDataString1[3:5]
-                            LuchtVochtASwaarde = arduinoDataString1[8:10]
-                            LichtASwaarde = arduinoDataString1[13:16]
-                            time.sleep(1)
+                            if z == 0:
+                                z = z + 1
+                            else:
+                                while x == 1:
+                                    arduino1 = serial.Serial("COM5", baudrate=9600)  # ArduinoAS
+                                    arduinoDataString1 = arduino1.readline().decode(
+                                        'utf-8').rstrip()  # vertaald de arduino wartaal
+                                    time.sleep(1)
 
-                            try:
-                                conn = mysql.connector.connect(db)  # handig voor later in de code
-                                if AardeVochtASwaarde != '':  # mocht er een error zijn
-                                    cursor.execute(
-                                        "INSERT INTO AardeVochtAS (AardeVochtASwaarde, date) VALUES (%s, %s)",
-                                        # dit is eigenlijk gewoon een sql query
-                                        (AardeVochtASwaarde, timestamp))
-                                    conn.commit()  # zorgt ervoor dat er echt verandering komt
-                                    print("Aardevocht waarde is ", AardeVochtASwaarde)  # mocht er iets fout gaan
+                                    # Dataimport arduino1 AKA arduino AS
+                                    st.write(arduinoDataString1)
+                                    time.sleep(1)
+                                    AardeVochtASwaarde = int(arduinoDataString1[0:3])
+                                    TemperatuurASwaarde = int(arduinoDataString1[3:5])
+                                    LuchtVochtASwaarde = int(arduinoDataString1[8:10])
+                                    LichtASwaarde = int(arduinoDataString1[13:16])
+                                    time.sleep(1)
 
-                            except:
-                                print("Aardevocht error")  # mocht er iets fout zijn
-                                conn = mysql.connector.connect(db)
+                                    try:
+                                        conn = mysql.connector.connect(db)  # handig voor later in de code
+                                        if AardeVochtASwaarde != '':  # mocht er een error zijn
+                                            cursor.execute(
+                                                "INSERT INTO AardeVochtAS (AardeVochtASwaarde, date) VALUES (%s, %s)",
+                                                # dit is eigenlijk gewoon een sql query
+                                                (AardeVochtASwaarde, timestamp))
+                                            conn.commit()  # zorgt ervoor dat er echt verandering komt
+                                            print("Aardevocht waarde is ", AardeVochtASwaarde)  # mocht er iets fout gaan
 
-                            try:
-                                if TemperatuurASwaarde != '':
-                                    cursor.execute(
-                                        "INSERT INTO TemperatuurAS (TemperatuurASwaarde, date) VALUES (%s, %s)",
-                                        (TemperatuurASwaarde, timestamp))
-                                    conn.commit()
-                                    print("Temperatuur waarde is ", TemperatuurASwaarde)
-                            except:
-                                print('Temp error')
-                            try:
-                                if LuchtVochtASwaarde != '':
-                                    cursor.execute(
-                                        "INSERT INTO LuchtVochtAS (LuchtVochtASwaarde, date) VALUES (%s, %s)",
-                                        (LuchtVochtASwaarde, timestamp))
-                                    conn.commit()
-                                    print("LuchtVocht is ", LuchtVochtASwaarde)
-                            except:
-                                print('LV error')
-                            try:
-                                if LichtASwaarde != '':
-                                    cursor.execute("INSERT INTO LichtAS (LichtASwaarde, date) VALUES (%s, %s)",
-                                                   (LichtASwaarde, timestamp))
-                                    conn.commit()
-                                    print("Licht waarde is ", LichtASwaarde)
-                            except:
-                                print('Licht error')
+                                    except:
+                                        print("Aardevocht error")  # mocht er iets fout zijn
+                                        conn = mysql.connector.connect(db)
+
+                                    try:
+                                        if TemperatuurASwaarde != '':
+                                            cursor.execute(
+                                                "INSERT INTO TemperatuurAS (TemperatuurASwaarde, date) VALUES (%s, %s)",
+                                                (TemperatuurASwaarde, timestamp))
+                                            conn.commit()
+                                            print("Temperatuur waarde is ", TemperatuurASwaarde)
+                                    except:
+                                        print('Temp error')
+                                    try:
+                                        if LuchtVochtASwaarde != '':
+                                            cursor.execute(
+                                                "INSERT INTO LuchtVochtAS (LuchtVochtASwaarde, date) VALUES (%s, %s)",
+                                                (LuchtVochtASwaarde, timestamp))
+                                            conn.commit()
+                                            print("LuchtVocht is ", LuchtVochtASwaarde)
+                                    except:
+                                        print('LV error')
+                                    try:
+                                        if LichtASwaarde != '':
+                                            cursor.execute("INSERT INTO LichtAS (LichtASwaarde, date) VALUES (%s, %s)",
+                                                           (LichtASwaarde, timestamp))
+                                            conn.commit()
+                                            print("Licht waarde is ", LichtASwaarde)
+                                    except:
+                                        print('Licht error')
+                                        placeholder = st.empty()
+                                while True:
+                                    TemperatuurASList = TemperatuurASList.append(TemperatuurASwaarde)
+                                    AardeVochtASList = AardeVochtASList.append(AardeVochtASwaarde)
+                                    LuchtVochtASList = LuchtVochtASList.append(LuchtVochtASwaarde)
+                                    LichtASList = LichtASList.append(LichtASwaarde)
+
+                                    time.sleep(0.1)
+
+                                    TemperatuurASdate = TemperatuurASdate.append(timestamp)
+                                    AardeVochtASdate = AardeVochtASdate.append(timestamp)
+                                    LuchtVochtASdate = LuchtVochtASdate.append(timestamp)
+                                    LichtASdate = LichtASdate.append(timestamp)
+
+                                    time.sleep(0.1)
+
+                                    try:
+                                        fig,ax = plt.subplots(3,1)
+                                        ax[0].plot(TemperatuurASList, TemperatuurASdate)
+                                        ax[1].plot(AardeVochtASList,AardeVochtASdate)
+                                        ax[2].plot(LuchtVochtASList,LuchtVochtASdate)
+                                        ax[3].plot(LichtASList, LichtASdate)
+                                        time.sleep(1)
+                                    except:
+                                        st.write("Plot has failed")
                         except:
-                            st.write("Error data waardes 1")
+                            st.write("Error data1")
 
-                        try:
-                            TemperatuurASList = TemperatuurASList.append(TemperatuurASwaarde)
-                            AardeVochtASList = AardeVochtASList.append(AardeVochtASwaarde)
-                            LuchtVochtASList = LuchtVochtASList.append(LuchtVochtASwaarde)
-                            LichtASList = LichtASList.append(LichtASwaarde)
-
-                            time.sleep(0.1)
-
-                            TemperatuurASdate = TemperatuurASdate.append(timestamp)
-                            AardeVochtASdate = AardeVochtASdate.append(timestamp)
-                            LuchtVochtASdate = LuchtVochtASdate.append(timestamp)
-                            LichtASdate = LichtASdate.append(timestamp)
-
-                            time.sleep(0.1)
-                        except:
-                            st.write("Data import AS failed")
-                    try:
-                        fig,ax = plt.subplot(3,1)
-                        ax[0,1].plot = (TemperatuurASList, TemperatuurASdate)
-                        ax[1,1].plot(AardeVochtASList,AardeVochtASdate)
-                        ax[2,1].plot(LuchtVochtASList,LuchtVochtASdate)
-                        ax[3,1].plot(LichtASList, LichtASdate)
-                        time.sleep(0.1)
-                    except:
-                        st.write("Plot has failed")
                 elif "Arduino2" in multiselectRPI:
-                    try:
-                        arduino2 = serial.Serial("COM3", baudrate=9600, timeout=3)  # idk wat timeout doet
-                        arduinoDataString2 = arduino2.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
-                    except:
-                        print("")
+
+                    arduino2 = serial.Serial("COM3", baudrate=9600, timeout=3)  # idk wat timeout doet
+                    arduinoDataString2 = arduino2.readline().decode('utf-8').strip()  # vertaald de arduino wartaal
+
                     try:
                         AardeVocht1arduino1_waarde = arduinoDataString2[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
                         Licht1arduino1_waarde = arduinoDataString2[3:6]
@@ -434,12 +445,12 @@ if x == 1: # dit voorkomt gedoe met tab
                             LichtArduino1Waarde1Date = LichtArduino1Waarde1Date.append(timestamp)
 
                             TemperatuurArduino1Waarde2List = TemperatuurArduino1Waarde2List.apppend(
-                                Temperatuur2arduino2_waarde)
+                                Temperatuur2arduino1_waarde)
                             AardeVochtArduino1Waarde2List = AardeVochtArduino1Waarde2List.append(
-                                AardeVocht2arduino2_waarde)
+                                AardeVocht2arduino1_waarde)
                             LuchtVochtArduino1Waarde2List = LuchtVochtArduino1Waarde2List.append(
-                                LuchtVocht2arduino2_waarde)
-                            LichtArduino1Waarde2List = LichtArduino1Waarde2List.append(Licht2arduino2_waarde)
+                                LuchtVocht2arduino1_waarde)
+                            LichtArduino1Waarde2List = LichtArduino1Waarde2List.append(Licht2arduino1_waarde)
 
                             TemperatuurArduino1Waarde2Date = TemperatuurArduino1Waarde2Date.append(timestamp)
                             AardeVochtArduino1Waarde2Date = AardeVochtArduino1Waarde2Date.append(timestamp)
@@ -469,6 +480,7 @@ if x == 1: # dit voorkomt gedoe met tab
                         print('')
 
                     try:
+
                         AardeVocht1arduino2_waarde = arduinoDataString3[0:3]  # drie waardes want 1000 is onwaarschijnlijk tenzij kapot
                         Licht1arduino2_waarde = arduinoDataString3[3:6]
                         LuchtVocht1arduino2_waarde = arduinoDataString3[6:8]
@@ -478,7 +490,7 @@ if x == 1: # dit voorkomt gedoe met tab
                         LuchtVocht2arduino2_waarde = arduinoDataString3[18:20]
                         Temperatuur2arduino2_waarde = arduinoDataString3[23:25]  # klein gat door .00
                         import_arduino2()
-                        st.pyplot(fig)
+
                     except:
                         st.write("Error data waardes 3")
                         x = 2 # stop de code
@@ -747,8 +759,6 @@ if x == 1: # dit voorkomt gedoe met tab
 
     elif sideselectbox == "Progression and prospects":
         st.write("This page is under construction")
-
-
 
 
 
