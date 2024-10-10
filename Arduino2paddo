@@ -21,14 +21,10 @@ const int vochtigheidsmeter1 = A0;
 const int lichtdetector1 = A1;
 const int temperat_1 = A2;
 const int pomp1 = 2; // dit is voor de waterpomp voor de planten
-const int pomp2 = 3; // dit is een andere waterpomp
 
 
-//variabelen voor kant 2
-const int vochtigheidsmeter2 = A5;
-const int lichtdetector2 = A4;
-const int temperat_2 = A3;
-//int lichtwaarde2 = 0;
+
+
 int Pycharmcommand = Serial.read(); // wat wordt er gestuurd vanaf de pycharm code
 void setup(){
   Serial.begin(9600);
@@ -67,25 +63,7 @@ void loop (void){
     Serial.print(temp_1);
     delay(1000);
 
-    //kant 2
-    //vochtigheidsmeter 2
-    int aardvochtValue2 = analogRead(A5);
-    //Serial.print("Aardevocht2 is: ");
-    Serial.print(aardvochtValue2);
-    delay(1000); // anders gaat de code te snel en kunnen er mogelijk foute waardes uitkomen
-    //lichtdetector1
-    int lichtwaarde2  = analogRead(A4);
-    //Serial.print("Lichtwaarde2 = ");
-    Serial.print(lichtwaarde2);
-    delay(1000);
-    //temperat_1
-    float humid_2 = dht2.readHumidity();
-    float temp_2 = dht2.readTemperature();
-    //Serial.print("Luchtvochtigheid2 = ");
-    Serial.print(humid_2);
-    //Serial.print("Temperatuur2 = ");
-    Serial.print(temp_2);
-    delay(1000);
+    
 
     //SD kaart
 
@@ -95,10 +73,6 @@ void loop (void){
     dataString += String(temp_1);    // Voeg temperatuur toe
     dataString += String(humid_1);  // Voeg luchtvochtigheid toe
     dataString += String(lichtwaarde1);  // Voeg lichtwaarde1 toe
-    dataString += String(aardvochtValue2);
-    dataString += String(temp_2);
-    dataString += String(humid_2);
-    dataString += String(lichtwaarde2);
 
     File dataFile = SD.open("Arduino3/26/9.txt", FILE_WRITE);  // Open bestand op SD-kaart
     if (dataFile) {
@@ -112,7 +86,7 @@ void loop (void){
     // waterpomp1 voor de planten
     int waterpomp1 = analogRead(pomp1);
 
-    if (waterpomp1 >= 520){
+    if (waterpomp1 >= 850){
       digitalWrite(pomp1, HIGH);
     }
     else {
@@ -120,13 +94,7 @@ void loop (void){
     }
     }
     // water pomp2 voor de paddo's
-    int waterpomp2= analogRead(pomp2);
-    if (waterpomp2 >= 800){ // idk of deze waardes goed zijn
-      digitalWrite(pomp2, HIGH);
-    }
-    else {
-      digitalWrite(pomp2,LOW);
-    }
+    
 
   if (Pycharmcommand = "Initiate SD-card Arduino 3"){
         // Lees het bestand regel voor regel
@@ -141,4 +109,3 @@ void loop (void){
 
 }
 }
-
