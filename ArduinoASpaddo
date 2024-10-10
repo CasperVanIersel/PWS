@@ -5,7 +5,7 @@
 #include <LiquidCrystal_I2C.h>  // voor het scherm
 #include <Wire.h>               // voor het scherm
 #include <TimeLib.h>           // voor de tid
-const int pomp = 2;          // voor de pomp
+const int pomp = 3;          // voor de pomp
 const int LichtSensorPin = A0;  // voor de lichtsensor
 const int AVochtMeter = A1;     // de vochtmeter in de aarde
 int Pycharmcommand = Serial.read();
@@ -30,72 +30,80 @@ void setup() {
   pinMode(LichtSensorPin, INPUT);  // computer weet dat dit input is
   lcd.begin();                     // start lcd scherm op
   lcd.backlight();                 // start backlight op
+  delay(100); // voor stabielere waardes
 
   //SD-kaart setup
   const int chipSelect = 10;
-  //if (!SD.begin(chipSelect)) {
+  if (!SD.begin(chipSelect)) {
     //Serial.println("SD-kaart mislukt");
-    //return;
- // }
+    return;
+  }
   //Serial.println("SD-kaart geslaagd");
 
 
 }
 
 void loop() {
-    if(Pycharmcommand = "Initiate sensorimport ArduinoAS" or Serial.available() > 0){
+    if(Pycharmcommand = "Initiate sensorimport ArduinoAS" || Serial.available() <= 0){
   //AardeVochtMeter
   int AVochtMeter_waarde = analogRead(A1);  // leest de waardes van de meter
   Serial.print(AVochtMeter_waarde);         // print de waarde
+  delay(100);
 
   //Pomp code
   int waterpomp = analogRead(pomp);
-  if (waterpomp >= 600){
-    digitalWrite(pomp, HIGH);
+  if (AVochtMeter_waarde >= 450){
+   digitalWrite(pomp, HIGH);
   }
   else{
-    digitalWrite(pomp, LOW);
+   digitalWrite(pomp, LOW);
   }
   
   //DHT11 sensor
   int chk = DHT.read11(DHT11_PIN);           // leest de sensor
   int Temperatuur_waarde = DHT.temperature;  // dit is de temp
-  Serial.print(DHT.temperature);
-  int Vochtigheids_waarde = DHT.humidity;  // dit is de vochtigheidsgehalte van de lucht
-  Serial.print(DHT.humidity);
+  String Temperatuur_waarde_string = String(Temperatuur_waarde) + ".00";
+  int Temperatuur_waarde_lengte = Temperatuur_waarde_string.length();
+
+  if(Temperatuur_waarde_lengte == 5){
+    Temperatuur_waarde = (Temperatuur_waarde);
+    Serial.print(DHT.temperature);
+  }
+  else{
+    Temperatuur_waarde_string = "00.00";
+    Serial.print(Temperatuur_waarde_string);
+  }
+  delay(1000);
+  //int chk = DHT.read11(DHT11_PIN);           // leest de sensor
+  int Vochtigheids_waarde = DHT.humidity;  // dit is de temp
+  String Vochtigheids_waarde_string = String(Vochtigheids_waarde) + ".00";
+  int Vochtigheids_waarde_lengte = Vochtigheids_waarde_string.length();
+
+  if(Vochtigheids_waarde_lengte == 5){
+    Vochtigheids_waarde = (Vochtigheids_waarde);
+    Serial.print(DHT.humidity);
+  }
+  else{
+    Serial.print("00.00");
+  }
+  delay(3000);
+
 
   // Lichtsensor
   int LichtSensorPin_waarde = analogRead(A3);
-  Serial.println(LichtSensorPin_waarde);  // zorgt voor een enter, zodat de pythoncode ook goed werkt
-
-  // LCD-scherm maar idk of we die willen gebruiken
-  delay(1000);             // even de computer laten rusten
-  lcd.clear();             // wist het vorige scherm
-  lcd.setCursor(0, 0);     // scherm begint op de bovenste rij
-  lcd.print("VochtA = ");  // VochtA = aarde vochtigheid
-  lcd.print(AVochtMeter_waarde);
-  lcd.setCursor(0, 1);  // Scherm begint op tweede rij
-  lcd.print("Licht = ");
-  lcd.print(LichtSensorPin_waarde);
-  delay(3000);  // dit is een goede tijd om het te lezen
-  lcd.clear();  // we beginnen weer met een nieuw scherm
-  lcd.setCursor(0, 0);
-  lcd.print("Temp = ");
-  lcd.print(Temperatuur_waarde);
-  lcd.setCursor(0, 1);
-  lcd.print("VochtL = ");  // staat voor de vochtigheid in de lucht
-  lcd.print(Vochtigheids_waarde);
-  delay(3000);
+  Serial.print(LichtSensorPin_waarde);  // zorgt voor een enter, zodat de pythoncode ook goed werkt
+  delay(1000);
 
   //SD-kaart
   String dataString = "";
   dataString += String(AVochtMeter_waarde);     // voegt de vochtigheidswaarde toe van de aarde
-  dataString += float(Temperatuur_waarde);     // voegt de temperatuur toe
-  dataString += float(Vochtigheids_waarde);    // voegt de vochtigheidswaarde toe van de lucht
+  dataString += String(Temperatuur_waarde);     // voegt de temperatuur toe
+  dataString += String(Vochtigheids_waarde);    // voegt de vochtigheidswaarde toe van de lucht
   dataString += String(LichtSensorPin_waarde);  // voegt het licht toe
+  delay(1000);
   //Serial.println(dataString);
 
-  File dataFile = SD.open("AS.txt", FILE_WRITE);  // opent bestand op de SD kaart
+  File dataFile = SD.open("9okt.txt", FILE_WRITE);  // opent bestand op de SD kaart
   if (dataFile) {
     dataFile.println(dataString);
     dataFile.close();
@@ -103,7 +111,7 @@ void loop() {
   } else {
     //Serial.println("Data mislukt");
   }
-  delay(9000000);
+  delay(1000);
   if (Pycharmcommand = "Initiate SD-card ArduinoAS"){
           // Lees het bestand regel voor regel
     while (dataFile.available()) {
@@ -113,7 +121,8 @@ void loop() {
     // Sluit het bestand
     dataFile.close();
   }
-
+  
+delay(1000);
 
 }
 }
