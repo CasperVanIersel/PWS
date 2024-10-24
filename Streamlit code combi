@@ -23,6 +23,11 @@ cursor = db.cursor()
 #Variabelen
 x = 1 # variabele die verder in de code wordt gebruikt om errors te voorkomen
 
+st.sidebar.header("Menu")  # dit is de titel van de sidebar
+sideselectbox = st.sidebar.selectbox("Choose page",
+                                     ["Home", "Plot Data", "Realtime plot and input", "Progression and prospects"],
+                                     key="selectbox")
+language = st.sidebar.selectbox('Choose your language / Kies je taal', ('English', 'Nederlands'))
 
 #Datum een integer maken --> id voor iedere tabel is toch uniek
 now = str(datetime.datetime.now())
