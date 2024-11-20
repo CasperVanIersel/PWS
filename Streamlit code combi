@@ -29,6 +29,26 @@ sideselectbox = st.sidebar.selectbox("Choose page",
                                      key="selectbox")
 language = st.sidebar.selectbox('Choose your language / Kies je taal', ('English', 'Nederlands'))
 
+# Terug naar boven knop met HTML en JavaScript
+back_to_top_button = """
+    <a href="#top" style="
+        position: fixed;
+        bottom: 50px;
+        right: 50px;
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+        z-index: 1000;
+    ">↑ Terug naar boven</a>
+"""
+
+st.markdown('<div id="top"></div>', unsafe_allow_html=True)  # Plaats een anker bovenaan
+
 #Datum een integer maken --> id voor iedere tabel is toch uniek
 now = str(datetime.datetime.now())
 timestamp_int1 = now.replace(".", "")
@@ -1016,3 +1036,5 @@ if x == 1:  # dit voorkomt gedoe met tab
                 else:
                     st.warning(
                         f"You need more compost! Deficit: {-compost_diff} kg." if language == 'English' else f"Je hebt meer compost nodig! Tekort: {-compost_diff} kg.")
+            
+            st.markdown(back_to_top_button, unsafe_allow_html=True)
