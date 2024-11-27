@@ -317,6 +317,8 @@ page = st.sidebar.selectbox("Navigatie", ["Home", "Data Management", "Grafieken"
 
 language = st.sidebar.selectbox('Choose your language / Kies je taal', ('English', 'Nederlands'))
 
+st.sidebar.image("images/Growgo2.png", use_column_width=True)
+
 # Terug naar boven knop met HTML en JavaScript
 back_to_top_button = """
     <a href="#top" style="
