@@ -204,7 +204,7 @@ def predict_growth(crop_name):
         df = pd.read_sql(f"SELECT * FROM plant_status WHERE crop_name = '{crop_name}'", conn)
 
     if df.empty:
-        return "Geen gegevens beschikbaar voor voorspelling."
+        return "Geen gegevens beschikbaar voor voorspelling. "
 
     X = df[['timestamp']].values
     y = df['length'].values
@@ -310,23 +310,41 @@ language = st.sidebar.selectbox('Choose your language / Kies je taal', ('English
 
 st.sidebar.image("images/Growgo2.png", use_column_width=True)
 
-# Terug naar boven knop met HTML en JavaScript
-back_to_top_button = """
-    <a href="#top" style="
-        position: fixed;
-        bottom: 50px;
-        right: 50px;
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 20px;
-        text-align: center;
-        text-decoration: none;
-        border-radius: 5px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        font-size: 14px;
-        z-index: 1000;
-    ">↑ Terug naar boven</a>
-"""
+if language == "Nederlands":
+    # Terug naar boven knop met HTML en JavaScript
+    back_to_top_button = """
+        <a href="#top" style="
+            position: fixed;
+            bottom: 50px;
+            right: 50px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+            z-index: 1000;
+        ">↑ Terug naar boven </a>
+    """
+else:
+    back_to_top_button = """
+            <a href="#top" style="
+                position: fixed;
+                bottom: 50px;
+                right: 50px;
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                border-radius: 5px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                font-size: 14px;
+                z-index: 1000;
+            ">↑ Back to top </a>
+        """
 
 st.markdown('<div id="top"></div>', unsafe_allow_html=True)  # Plaats een anker bovenaan
 
@@ -359,11 +377,11 @@ if page == "Data Management":
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        start_import = st.button("Start Importeren")
+        start_import = st.button("Start Importeren" if language == "Nederlands" else "Start importing")
     with col2:
-        stop_import = st.button("Stop Importeren")
+        stop_import = st.button("Stop Importeren" if language == "Nederlands" else "Stop Importing")
     with col3:
-        clear_db = st.button("Leeg Database")
+        clear_db = st.button("Leeg Database" if language == "Nederlands" else "Clear Database")
 
     # Placeholder voor tabelweergave
     data_placeholder = st.empty()
@@ -371,7 +389,7 @@ if page == "Data Management":
     if clear_db:
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute("DELETE FROM sensor_data")
-        st.success("Database geleegd!")
+        st.success("Database geleegd!" if language == "Nederlands" else "Database cleared!")
         st.session_state.time_offset = 0
 
     # Start importeren
@@ -383,9 +401,9 @@ if page == "Data Management":
             # Connect to Arduino
             try:
                 ser = serial.Serial('COM3', 9600)
-                st.success("Connected to Arduino successfully!")
+                st.success("Connected to Arduino successfully!" if language == "English" else "Succesvol verbonden met Arduino!")
             except Exception as e:
-                st.error(f"Failed to connect to Arduino: {e}")
+                st.error(f"Failed to connect to Arduino: {e}" if language == "English" else f"Verbinden met Arduino mislukt: {e}")
                 st.session_state.import_running = False
 
     # Stop importeren
@@ -395,7 +413,7 @@ if page == "Data Management":
 
     # Importeren van data
     if st.session_state.import_running:
-        st.info("Data importeren gestart...")
+        st.info("Data importeren gestart..." if language == "Nederlands" else "Importing data...")
         while st.session_state.import_running:
             new_data = read_arduino_data()
             if new_data:
@@ -406,21 +424,21 @@ if page == "Data Management":
             data_placeholder.dataframe(db_data)
             time.sleep(2)
 
-    st.title("Inspect Database")
+    st.title("Inspecteer Database" if language == "Nederlands" else "Inspect Database")
     with sqlite3.connect(DB_PATH) as conn:
         df = pd.read_sql("SELECT * FROM sensor_data", conn)
     st.write(df)
 
 elif page == "Grafieken":
-    st.title("Sensor Grafieken")
+    st.title("Sensor Grafieken" if language == "Nederlands" else "Sensor Graphs")
     with sqlite3.connect(DB_PATH) as conn:
         df = pd.read_sql("SELECT * FROM sensor_data", conn)
 
     if df.empty:
-        st.warning("Geen gegevens beschikbaar.")
+        st.warning("Geen gegevens beschikbaar." if language == "Nederlands" else "No data available.")
     else:
         sensor_columns = [col for col in df.columns if col not in ["id"]]
-        selected_sensors = st.multiselect("Selecteer sensoren", sensor_columns, sensor_columns)
+        selected_sensors = st.multiselect("Selecteer sensoren" if language == "Nederlands" else "Select sensors", sensor_columns, sensor_columns)
         if selected_sensors:
             filtered_data = df.melt(id_vars=["id"], value_vars=selected_sensors)
             fig = px.line(
@@ -434,54 +452,70 @@ elif page == "Grafieken":
             st.plotly_chart(fig)
 
 elif page == "Sensor-Gewas Koppeling":
-    st.title("Sensor-Gewas Koppeling")
-    crop_name = st.text_input("Gewasnaam")
-    dht11_sensor = st.selectbox("DHT11 Sensor", ["dht11_1", "dht11_2", "dht11_3"])
-    soil_sensor = st.selectbox("Bodemvochtigheid Sensor", ["soil_1", "soil_2", "soil_3"])
-    light_sensor = st.selectbox("Licht Sensor", ["light_1", "light_2", "light_3"])
-    optimum_temp = st.number_input("Optimale Temperatuur (°C)", min_value=0.0, max_value=50.0, step=0.1)
-    optimum_hum = st.number_input("Optimale Vochtigheid (%)", min_value=0.0, max_value=100.0, step=0.1)
-    optimum_soil = st.number_input("Optimale Bodemvochtigheid (units)", min_value=0.0, max_value=1000.0, step=1.0)
-    optimum_light = st.number_input("Optimale Lichtintensiteit (units)", min_value=0.0, max_value=1000.0, step=1.0)
-    avg_harvest_time = st.number_input("Gemiddelde Oogsttijd (dagen)", min_value=0.0, step=1.0)
-    avg_growth = st.number_input("Gemiddelde Groei (cm/dag)", min_value=0.0, step=0.1)
-    possible_diseases = st.text_area("Mogelijke Ziekten")
-    disease_signs = st.text_area("Ziekte Symptomen")
-    water_needs = st.number_input("Waterbehoefte (L/dag)", min_value=0.0, step=0.1)
+    if language == "Nederlands":
+        st.title("Sensor-Gewas Koppeling")
+        crop_name = st.text_input("Gewasnaam")
+        dht11_sensor = st.selectbox("DHT11 Sensor", ["dht11_1", "dht11_2", "dht11_3"])
+        soil_sensor = st.selectbox("Bodemvochtigheid Sensor", ["soil_1", "soil_2", "soil_3"])
+        light_sensor = st.selectbox("Licht Sensor", ["light_1", "light_2", "light_3"])
+        optimum_temp = st.number_input("Optimale Temperatuur (°C)", min_value=0.0, max_value=50.0, step=0.1)
+        optimum_hum = st.number_input("Optimale Vochtigheid (%)", min_value=0.0, max_value=100.0, step=0.1)
+        optimum_soil = st.number_input("Optimale Bodemvochtigheid (units)", min_value=0.0, max_value=1000.0, step=1.0)
+        optimum_light = st.number_input("Optimale Lichtintensiteit (units)", min_value=0.0, max_value=1000.0, step=1.0)
+        avg_harvest_time = st.number_input("Gemiddelde Oogsttijd (dagen)", min_value=0.0, step=1.0)
+        avg_growth = st.number_input("Gemiddelde Groei (cm/dag)", min_value=0.0, step=0.1)
+        possible_diseases = st.text_area("Mogelijke Ziekten")
+        disease_signs = st.text_area("Ziekte Symptomen")
+        water_needs = st.number_input("Waterbehoefte (L/dag)", min_value=0.0, step=0.1)
+    else:
+        st.title("Sensor-Crop Coupler")
+        crop_name = st.text_input("Crop name")
+        dht11_sensor = st.selectbox("DHT11 Sensor", ["dht11_1", "dht11_2", "dht11_3"])
+        soil_sensor = st.selectbox("Soil Moisture Sensor", ["soil_1", "soil_2", "soil_3"])
+        light_sensor = st.selectbox("Light Sensor", ["light_1", "light_2", "light_3"])
+        optimum_temp = st.number_input("Optimal Temperature (°C)", min_value=0.0, max_value=50.0, step=0.1)
+        optimum_hum = st.number_input("Optimal Moisture (%)", min_value=0.0, max_value=100.0, step=0.1)
+        optimum_soil = st.number_input("Optimal Soil Moisture (units)", min_value=0.0, max_value=1000.0, step=1.0)
+        optimum_light = st.number_input("Optimal Light Intensity (units)", min_value=0.0, max_value=1000.0, step=1.0)
+        avg_harvest_time = st.number_input("Average Harvest Time (days)", min_value=0.0, step=1.0)
+        avg_growth = st.number_input("Average Growth (cm/day)", min_value=0.0, step=0.1)
+        possible_diseases = st.text_area("Potential Diseases")
+        disease_signs = st.text_area("Disease Symptoms")
+        water_needs = st.number_input("Water demand (L/day)", min_value=0.0, step=0.1)
 
-    if st.button("Voeg Gewas Toe"):
+    if st.button("Voeg Gewas Toe" if language == "Nederlands" else "Add crop"):
         crop_data = (
             crop_name, dht11_sensor, soil_sensor, light_sensor,
             optimum_temp, optimum_hum, optimum_soil, optimum_light,
             avg_harvest_time, avg_growth, possible_diseases, disease_signs, water_needs
         )
         add_crop_to_db(crop_data)
-        st.success("Gewas toegevoegd aan de database!")
+        st.success("Gewas toegevoegd aan de database!" if language == "Nederlands" else "Crop added to database!")
 
-    crop_to_delete = st.selectbox("Selecteer Gewas om te Verwijderen", [row[0] for row in sqlite3.connect(DB_PATH).execute(
+    crop_to_delete = st.selectbox("Selecteer Gewas om te Verwijderen" if language == "Nederlands" else "Select crop to delete", [row[0] for row in sqlite3.connect(DB_PATH).execute(
         "SELECT crop_name FROM crop_sensor_mapping").fetchall()])
-    if st.button("Verwijder Gewas"):
+    if st.button("Verwijder Gewas " if language == "Nederlands" else "Delete Crop"):
         delete_crop_from_db(crop_to_delete)
-        st.success("Gewas verwijderd uit de database!")
+        st.success("Gewas verwijderd uit de database!" if language == "Nederlands" else "Crop removed from database!")
 
 elif page == "AI Voorspelling":
-    st.title("AI Voorspelling")
-    crop_name = st.selectbox("Selecteer Gewas", [row[0] for row in sqlite3.connect(DB_PATH).execute(
+    st.title("AI Voorspelling" if language == "Nederlands" else "AI Forecast")
+    crop_name = st.selectbox("Selecteer Gewas" if language == "Nederlands" else "Select Crop", [row[0] for row in sqlite3.connect(DB_PATH).execute(
         "SELECT crop_name FROM crop_sensor_mapping").fetchall()])
-    status = st.text_area("Beschrijving van de huidige status van de plant")
-    length = st.number_input("Huidige lengte van de plant (cm)", min_value=0.0, step=0.1)
-    date = st.date_input("Datum van meting", datetime.now().date())
+    status = st.text_area("Beschrijving van de huidige status van de plant" if language == "Nederlands" else "Description of the current state of the crop")
+    length = st.number_input("Huidige lengte van de plant (cm)" if language == "Nederlands" else "Current length of the plant (cm)", min_value=0.0, step=0.1)
+    date = st.date_input("Datum van meting" if language == "Nederlands" else "Date of measurement", datetime.now().date())
 
-    if st.button("Sla Plant Status Op"):
+    if st.button("Sla Plant Status Op" if language == "Nederlands" else "Save Crop Status"):
         timestamp = int(datetime.combine(date, datetime.min.time()).timestamp())
 
         status_data = (timestamp, crop_name, status, length)
 
-    if st.button("Voorspel Groei"):
+    if st.button("Voorspel Groei" if language == "Nederlands" else "Forecast Growth"):
         prediction = predict_growth(crop_name)
 
         st.info(prediction)
-    if st.button("Plot Groei"):
+    if st.button("Plot Groei" if language == "Nederlands" else "Plot Growth"):
 
         predictions = predict_growth(crop_name)  # Get predictions again if needed
 
